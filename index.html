@@ -10,10 +10,14 @@
 <body>
     <div id="exambrowser-container">
         <header>
-            <h1>Exambrowser</h1>
+            <h1>Masfy Exambrowser</h1>
         </header>
 
         <main id="main-content">
+            <div id="timer-container">
+                <span id="timer">00:00</span> 
+            </div>
+
             <div class="input-container" id="url-container">
                 <label for="url-input">Masukkan Tautan Ujian:</label>
                 <input type="text" id="url-input" placeholder="Masukkan tautan ujian (misal: Google Form)">
@@ -29,6 +33,10 @@
 
             <div id="iframe-container" style="display: none;">
                 <iframe id="exam-iframe" src="" width="100%" height="600px"></iframe>
+            </div>
+
+            <div id="complete-container" style="display: none;">
+                <button id="finish-btn">Selesai Ujian</button>
             </div>
 
             <div id="footer">
