@@ -73,7 +73,7 @@
       <div id="qr-reader" class="hidden mt-2"></div>
     </div>
 
-    <!-- Start Exam Button -->
+    <!-- Start Exam Button with added margin -->
     <div class="mt-4">
       <button id="start-exam" class="w-full py-2 bg-green-300 text-white rounded-md hover:bg-green-400 transition disabled:opacity-50" disabled aria-label="Mulai ujian">Mulai Ujian</button>
     </div>
@@ -84,8 +84,8 @@
     <!-- Motivational Message -->
     <p class="text-center text-gray-600 text-sm mt-4">Selalu berdoa sebelum mengerjakan, semoga mendapatkan nilai terbaik.</p>
 
-    <br><p class="text-center text-gray-600 text-sm mt-4">©2025 | Created by <a href="https://www.instagram.com/masalfy" target="_blank" class="text-blue-500">Mas Al</a></p>
-
+    <!-- Copyright with Instagram link -->
+    <p class="text-center text-gray-600 text-sm mt-4">©2025 | Created by <a href="https://www.instagram.com/masalfy" target="_blank" class="text-blue-500 hover:underline">Mas Al</a></p>
   </div>
 
   <!-- Exam Frame -->
@@ -110,12 +110,7 @@
     const exitExamBtn = document.getElementById('exit-exam');
     const timerDisplay = document.getElementById('timer');
     let qrScanner = null;
-    let timerInterval = null;
-
-    // Auto fullscreen on page load
-    window.addEventListener('load', () => {
-      enterFullscreen();
-    });
+    let isExamRunning = false;
 
     // Function to enter fullscreen
     function enterFullscreen() {
@@ -126,27 +121,31 @@
 
     // Reset to initial state
     function resetToInitial() {
+      isExamRunning = false; // Stop the timer
       document.exitFullscreen();
       examContainer.classList.add('hidden');
       mainContainer.classList.remove('hidden');
       examFrame.src = '';
       examLinkInput.value = '';
       startExamBtn.disabled = true;
-      clearInterval(timerInterval);
       timerDisplay.textContent = '00:00:00';
       removeSecurityListeners();
-      // Attempt to close tab
       window.close();
     }
 
     // Start timer with requestAnimationFrame for mobile compatibility
     function startTimer() {
-      clearInterval(timerInterval);
+      isExamRunning = true;
       let seconds = 0;
       let lastTime = performance.now();
       
       function updateTimer(currentTime) {
-        if (document.hidden) return; // Skip update if tab is not active
+        if (!isExamRunning) return; // Stop if exam is not running
+        if (document.hidden) {
+          lastTime = currentTime;
+          requestAnimationFrame(updateTimer);
+          return;
+        }
         const delta = (currentTime - lastTime) / 1000;
         if (delta >= 1) {
           seconds += Math.floor(delta);
@@ -156,10 +155,10 @@
           const secs = seconds % 60;
           timerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
-        timerInterval = requestAnimationFrame(updateTimer);
+        requestAnimationFrame(updateTimer);
       }
       
-      timerInterval = requestAnimationFrame(updateTimer);
+      requestAnimationFrame(updateTimer);
     }
 
     // Enable start exam button if link is provided
@@ -232,6 +231,7 @@
       document.addEventListener('visibilitychange', handleSecurityBreach);
       window.addEventListener('blur', handleSecurityBreach);
       window.addEventListener('pagehide', handleSecurityBreach);
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
       document.addEventListener('keydown', preventShortcuts);
       document.addEventListener('contextmenu', preventContextMenu);
       document.addEventListener('copy', preventCopy);
@@ -241,6 +241,7 @@
       document.removeEventListener('visibilitychange', handleSecurityBreach);
       window.removeEventListener('blur', handleSecurityBreach);
       window.removeEventListener('pagehide', handleSecurityBreach);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('keydown', preventShortcuts);
       document.removeEventListener('contextmenu', preventContextMenu);
       document.removeEventListener('copy', preventCopy);
@@ -251,6 +252,13 @@
       resetToInitial();
       errorMessage.textContent = 'Ujian dihentikan karena aktivitas mencurigakan.';
       errorMessage.classList.remove('hidden');
+    }
+
+    // Handle fullscreen change
+    function handleFullscreenChange() {
+      if (!document.fullscreenElement) {
+        handleSecurityBreach();
+      }
     }
 
     // Prevent shortcuts
@@ -282,6 +290,5 @@
       }
     });
   </script>
-
 </body>
 </html>
