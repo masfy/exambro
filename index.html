@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masfy Exambrowser</title>
+    <title>Exambrowser</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/qr-scanner@1.3.0/qr-scanner.min.js"></script> <!-- Tambahkan Library QR Scanner -->
+    <script src="https://unpkg.com/qr-scanner@1.3.0/qr-scanner.min.js"></script> <!-- Library QR Scanner -->
 </head>
 <body>
     <div id="exambrowser-container">
         <header>
-            <h1>Masfy Exambrowser</h1>
+            <h1>Exambrowser</h1>
         </header>
 
-        <main>
-            <div class="input-container">
+        <main id="main-content">
+            <div class="input-container" id="url-container">
                 <label for="url-input">Masukkan Tautan Ujian:</label>
                 <input type="text" id="url-input" placeholder="Masukkan tautan ujian (misal: Google Form)">
                 <button id="start-exam-btn">Mulai Ujian</button>
@@ -26,6 +26,10 @@
             </div>
 
             <div id="error-message"></div>
+
+            <div id="iframe-container" style="display: none;">
+                <iframe id="exam-iframe" src="" width="100%" height="600px"></iframe>
+            </div>
 
             <div id="footer">
                 <p>Selalu berdoa sebelum mengerjakan ujian dan harap dapat nilai terbaik!</p>
