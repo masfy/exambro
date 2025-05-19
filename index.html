@@ -14,8 +14,7 @@
       margin: 0;
       overscroll-behavior: none;
     }
-    .no-screenshot {
-      pointer-events: none;
+    .no-select {
       user-select: none;
     }
     #exam-container {
@@ -25,6 +24,11 @@
       right: 0;
       bottom: 0;
       z-index: 9999;
+    }
+    #exam-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
   </style>
 </head>
@@ -55,21 +59,13 @@
   </div>
   
   <!-- Exam Frame -->
-  <div id="exam-container" class="hidden flex flex-col no-screenshot">
-    <div class="flex justify-between items-center p-4 bg-blue-200">
+  <div id="exam-container" class="hidden flex flex-col">
+    <div class="flex justify-between items-center p-4 bg-blue-200 no-select">
       <h2 class="text-lg font-semibold text-gray-800">Ujian Berlangsung</h2>
       <div id="timer" class="text-md font-medium text-gray-800">00:00:00</div>
       <button id="exit-exam" class="py-1 px-3 bg-red-300 text-white rounded-md hover:bg-red-400 transition" aria-label="Keluar dari ujian">Keluar</button>
     </div>
-    <iframe id="exam-frame" class="flex-1 w-full border-none"></iframe>
-  </div>
-  
-  <!-- Warning Modal (Unused, replaced by reset) -->
-  <div id="warning-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white p-6 rounded-lg max-w-sm text-center">
-      <h3 class="text-lg font-bold text-red-600">Peringatan!</h3>
-      <p class="text-gray-700">Jangan beralih ke tab atau aplikasi lain.</p>
-    </div>
+    <iframe id="exam-frame" allow="forms"></iframe>
   </div>
 
   <script>
@@ -115,6 +111,7 @@
 
     // Start timer
     function startTimer() {
+      clearInterval(timerInterval); // Clear any existing interval
       let seconds = 0;
       timerInterval = setInterval(() => {
         seconds++;
@@ -175,7 +172,7 @@
         };
         examFrame.onerror = () => {
           resetToInitial();
-          errorMessage.textContent = 'Tautan tidak tersedia.';
+          errorMessage.textContent = 'Tautan tidak tersedia atau tidak mendukung embedding.';
           errorMessage.classList.remove('hidden');
         };
 
@@ -207,7 +204,7 @@
       document.removeEventListener('copy', preventCopy);
     }
 
-    // Handle security breach (tab switch, etc.)
+    // Handle security breach
     function handleSecurityBreach() {
       resetToInitial();
       errorMessage.textContent = 'Ujian dihentikan karena aktivitas mencurigakan.';
