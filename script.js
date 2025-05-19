@@ -15,8 +15,16 @@ startExamBtn.addEventListener("click", () => {
         errorMessage.textContent = "Tautan tidak dapat kosong. Masukkan tautan ujian.";
     } else {
         errorMessage.textContent = "";
-        window.location.href = examUrl;
-        startTimer();  // Mulai timer setelah mengakses ujian
+        // Menyembunyikan input dan menampilkan iframe
+        document.getElementById("url-container").style.display = "none";
+        document.getElementById("qr-container").style.display = "none";
+        document.getElementById("iframe-container").style.display = "block";
+
+        // Memasukkan URL ke dalam iframe
+        const examIframe = document.getElementById("exam-iframe");
+        examIframe.src = examUrl;
+
+        startTimer();  // Mulai timer setelah ujian dibuka
     }
 });
 
@@ -41,7 +49,11 @@ function startQrScanner() {
 // Fungsi untuk menangani hasil pemindaian QR
 function qrScanResult(result) {
     examUrl = result.data; // Menyimpan URL dari hasil pemindaian QR
-    window.location.href = examUrl; // Mengarahkan ke URL yang dipindai
+    const examIframe = document.getElementById("exam-iframe");
+    examIframe.src = examUrl; // Menyisipkan URL ke dalam iframe
+    document.getElementById("url-container").style.display = "none"; // Menyembunyikan input
+    document.getElementById("qr-container").style.display = "none"; // Menyembunyikan tombol scan QR
+    document.getElementById("iframe-container").style.display = "block"; // Menampilkan iframe
 }
 
 // Menangani situasi ketika tab lain dibuka
