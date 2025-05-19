@@ -75,6 +75,7 @@ window.addEventListener("blur", () => {
 
 // Timer (untuk ujian)
 function startTimer() {
+    timerDisplay.style.display = "block"; // Menampilkan timer setelah ujian dimulai
     timerInterval = setInterval(() => {
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
