@@ -16,31 +16,37 @@ startExamBtn.addEventListener("click", () => {
     } else {
         errorMessage.textContent = "";
         window.location.href = examUrl;
+        startTimer();  // Mulai timer setelah mengakses ujian
     }
 });
 
-// Fungsi untuk pemindaian QR code
+// Fungsi untuk memulai pemindaian QR Code
 qrScanBtn.addEventListener("click", () => {
     startQrScanner();
 });
 
 function startQrScanner() {
+    // Menampilkan video untuk pemindaian QR
     qrVideo.style.display = "block";
+    
+    // Inisialisasi pemindai QR dengan QRScanner
     const scanner = new QrScanner(qrVideo, result => {
         qrScanResult(result);
     });
 
+    // Memulai pemindaian QR
     scanner.start();
 }
 
+// Fungsi untuk menangani hasil pemindaian QR
 function qrScanResult(result) {
-    examUrl = result.data;
-    window.location.href = examUrl;
+    examUrl = result.data; // Menyimpan URL dari hasil pemindaian QR
+    window.location.href = examUrl; // Mengarahkan ke URL yang dipindai
 }
 
-// Fungsi untuk menangani navigasi tab lain
+// Menangani situasi ketika tab lain dibuka
 window.addEventListener("blur", () => {
-    window.location.reload(); // Mengembalikan ke halaman utama jika tab lain dibuka
+    window.location.reload(); // Reload halaman jika tab dibuka
 });
 
 // Timer (untuk ujian)
@@ -60,4 +66,3 @@ function startTimer() {
         }
     }, 1000);
 }
-
