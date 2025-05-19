@@ -38,35 +38,30 @@ startExamBtn.addEventListener("click", () => {
         enterFullScreen();  // Masuk ke mode layar penuh
     }
 });
-
-// Fungsi untuk memulai pemindaian QR Code
-qrScanBtn.addEventListener("click", () => {
-    startQrScanner();
-});
-
-function startQrScanner() {
-    // Menampilkan video untuk pemindaian QR
-    qrVideo.style.display = "block";
-
-    // Inisialisasi pemindai QR dengan QRScanner
-    const scanner = new QrScanner(qrVideo, result => {
-        qrScanResult(result);
+// Start QR code scanner
+    startQrScanBtn.addEventListener('click', () => {
+      qrReader.classList.toggle('hidden');
+      if (!qrScanner) {
+        qrScanner = new Html5Qrcode('qr-reader');
+        qrScanner.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          (decodedText) => {
+            examLinkInput.value = decodedText;
+            startExamBtn.disabled = false;
+            qrScanner.stop();
+            qrReader.classList.add('hidden');
+          },
+          (error) => {
+            console.warn('QR scan error:', error);
+          }
+        ).catch((err) => {
+          console.error('QR scanner error:', err);
+          errorMessage.textContent = 'Gagal mengakses kamera.';
+          errorMessage.classList.remove('hidden');
+        });
+      }
     });
-
-    // Memulai pemindaian QR
-    scanner.start();
-}
-
-// Fungsi untuk menangani hasil pemindaian QR
-function qrScanResult(result) {
-    examUrl = result.data; // Menyimpan URL dari hasil pemindaian QR
-    const examIframe = document.getElementById("exam-iframe");
-    examIframe.src = examUrl; // Menyisipkan URL ke dalam iframe
-    urlContainer.style.display = "none"; // Menyembunyikan input
-    qrContainer.style.display = "none"; // Menyembunyikan tombol scan QR
-    iframeContainer.style.display = "block"; // Menampilkan iframe
-    completeContainer.style.display = "block"; // Menampilkan tombol selesai
-}
 
 // Menangani situasi ketika tab lain dibuka
 window.addEventListener("blur", () => {
