@@ -100,7 +100,9 @@ iframe {
     cursor: pointer;
     font-size: 18px;
     display: block;
-    margin: 0 auto;
+    position: absolute;
+    top: 20px;
+    right: 20px;
 }
 
 /* Footer */
