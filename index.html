@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExamBrowser</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f4f8;
+    }
+    .no-screenshot {
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-pink-100 to-cream-100">
+  <div id="main-container" class="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold text-center text-gray-800 mb-4">ExamBrowser</h1>
+    
+    <!-- Input Link -->
+    <div class="mb-4">
+      <label for="exam-link" class="block text-sm font-medium text-gray-700">Masukkan Tautan Ujian</label>
+      <input type="url" id="exam-link" placeholder="https://example.com" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300">
+    </div>
+    
+    <!-- QR Code Scanner -->
+    <div class="mb-4">
+      <button id="start-qr-scan" class="w-full py-2 bg-blue-300 text-white rounded-md hover:bg-blue-400 transition">Scan QR Code</button>
+      <div id="qr-reader" class="hidden mt-2"></div>
+    </div>
+    
+    <!-- Start Exam Button -->
+    <button id="start-exam" class="w-full py-2 bg-green-300 text-white rounded-md hover:bg-green-400 transition" disabled>Mulai Ujian</button>
+    
+    <!-- Error Message -->
+    <p id="error-message" class="text-red-500 text-sm mt-2 hidden">Tautan tidak tersedia.</p>
+    
+    <!-- Motivational Message -->
+    <p class="text-center text-gray-600 text-sm mt-4">Selalu berdoa sebelum mengerjakan, semoga mendapatkan nilai terbaik.</p>
+  </div>
+  
+  <!-- Exam Frame -->
+  <div id="exam-container" class="hidden fixed inset-0 bg-white flex flex-col no-screenshot">
+    <div class="flex justify-between items-center p-4 bg-blue-200">
+      <h2 class="text-lg font-semibold text-gray-800">Ujian Berlangsung</h2>
+      <button id="exit-exam" class="py-1 px-3 bg-red-300 text-white rounded-md hover:bg-red-400">Keluar</button>
+    </div>
+    <iframe id="exam-frame" class="flex-1 w-full border-none"></iframe>
+  </div>
+  
+  <!-- Warning Modal -->
+  <div id="warning-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-lg max-w-sm text-center">
+      <h3 class="text-lg font-bold text-red-600">Peringatan!</h3>
+      <p class="text-gray-700">Jangan beralih ke tab atau aplikasi lain selama ujian.</p>
+      <button id="close-warning" class="mt-4 py-2 px-4 bg-blue-300 text-white rounded-md hover:bg-blue-400">Kembali</button>
+    </div>
+  </div>
+
+  <script>
+    const examLinkInput = document.getElementById('exam-link');
+    const startExamBtn = document.getElementById('start-exam');
+    const startQrScanBtn = document.getElementById('start-qr-scan');
+    const qrReader = document.getElementById('qr-reader');
+    const errorMessage = document.getElementById('error-message');
+    const mainContainer = document.getElementById('main-container');
+    const examContainer = document.getElementById('exam-container');
+    const examFrame = document.getElementById('exam-frame');
+    const exitExamBtn = document.getElementById('exit-exam');
+    const warningModal = document.getElementById('warning-modal');
+    const closeWarningBtn = document.getElementById('close-warning');
+    let qrScanner = null;
+
+    // Enable start exam button if link is provided
+    examLinkInput.addEventListener('input', () => {
+      startExamBtn.disabled = !examLinkInput.value;
+    });
+
+    // Start QR code scanner
+    startQrScanBtn.addEventListener('click', () => {
+      qrReader.classList.toggle('hidden');
+      if (!qrScanner) {
+        qrScanner = new Html5Qrcode('qr-reader');
+        qrScanner.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          (decodedText) => {
+            examLinkInput.value = decodedText;
+            startExamBtn.disabled = false;
+            qrScanner.stop();
+            qrReader.classList.add('hidden');
+          },
+          (error) => {
+            console.warn('QR scan error:', error);
+          }
+        ).catch((err) => {
+          console.error('QR scanner error:', err);
+          errorMessage.textContent = 'Gagal mengakses kamera.';
+          errorMessage.classList.remove('hidden');
+        });
+      }
+    });
+
+    // Start exam
+    startExamBtn.addEventListener('click', async () => {
+      const url = examLinkInput.value;
+      if (!url) return;
+
+      // Validate URL
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        if (!response.ok) throw new Error('Invalid URL');
+        
+        // Enter fullscreen and show exam
+        document.documentElement.requestFullscreen();
+        mainContainer.classList.add('hidden');
+        examContainer.classList.remove('hidden');
+        examFrame.src = url;
+
+        // Security measures
+        document.addEventListener('visibilitychange', handleSuspiciousActivity);
+        window.addEventListener('blur', handleSuspiciousActivity);
+        document.addEventListener('keydown', preventShortcuts);
+      } catch (err) {
+        errorMessage.textContent = 'Tautan tidak tersedia.';
+        errorMessage.classList.remove('hidden');
+      }
+    });
+
+    // Exit exam
+    exitExamBtn.addEventListener('click', () => {
+      document.exitFullscreen();
+      examContainer.classList.add('hidden');
+      mainContainer.classList.remove('hidden');
+      examFrame.src = '';
+      examLinkInput.value = '';
+      startExamBtn.disabled = true;
+      document.removeEventListener('visibilitychange', handleSuspiciousActivity);
+      window.removeEventListener('blur', handleSuspiciousActivity);
+      document.removeEventListener('keydown', preventShortcuts);
+    });
+
+    // Handle suspicious activity
+    function handleSuspiciousActivity() {
+      warningModal.classList.remove('hidden');
+      examFrame.classList.add('blur-sm');
+    }
+
+    // Close warning modal
+    closeWarningBtn.addEventListener('click', () => {
+      warningModal.classList.add('hidden');
+      examFrame.classList.remove('blur-sm');
+    });
+
+    // Prevent common shortcuts (Ctrl+Shift+I, Alt+Tab, etc.)
+    function preventShortcuts(e) {
+      if (e.ctrlKey || e.altKey || e.key === 'PrintScreen') {
+        e.preventDefault();
+        handleSuspiciousActivity();
+      }
+    }
+
+    // Warn on screenshot attempt (limited effectiveness)
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'PrintScreen') {
+        handleSuspiciousActivity();
+        alert('Screenshot tidak diizinkan selama ujian.');
+      }
+    });
+  </script>
+</body>
+</html>
