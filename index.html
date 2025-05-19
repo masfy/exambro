@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>Masfy Exam Bro</title>
+  <title>ExamBrowser</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
@@ -73,7 +73,7 @@
       <div id="qr-reader" class="hidden mt-2"></div>
     </div>
 
-    <!-- Start Exam Button with added margin -->
+    <!-- Start Exam Button -->
     <div class="mt-4">
       <button id="start-exam" class="w-full py-2 bg-green-300 text-white rounded-md hover:bg-green-400 transition disabled:opacity-50" disabled aria-label="Mulai ujian">Mulai Ujian</button>
     </div>
@@ -84,8 +84,8 @@
     <!-- Motivational Message -->
     <p class="text-center text-gray-600 text-sm mt-4">Selalu berdoa sebelum mengerjakan, semoga mendapatkan nilai terbaik.</p>
 
-    <!-- Copyright with Instagram link -->
-    <p class="text-center text-gray-600 text-sm mt-4">©2025 | Created by <a href="https://www.instagram.com/masalfy" target="_blank" class="text-blue-500 hover:underline">Mas Al</a></p>
+    <br><p class="text-center text-gray-600 text-sm mt-4">©2025 | Created by <a href="https://www.instagram.com/masalfy" target="_blank" class="text-blue-500">Mas Al</a></p>
+
   </div>
 
   <!-- Exam Frame -->
@@ -110,42 +110,49 @@
     const exitExamBtn = document.getElementById('exit-exam');
     const timerDisplay = document.getElementById('timer');
     let qrScanner = null;
-    let isExamRunning = false;
+    let timerInterval = null;
+
+    // Auto fullscreen on page load (but must be triggered by user interaction)
+    window.addEventListener('load', () => {
+      document.getElementById('start-exam').addEventListener('click', enterFullscreen);
+    });
 
     // Function to enter fullscreen
     function enterFullscreen() {
-      document.documentElement.requestFullscreen().catch((err) => {
-        console.warn('Fullscreen failed:', err);
-      });
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+      } else if (document.documentElement.mozRequestFullScreen) {
+        document.documentElement.mozRequestFullScreen(); // Firefox
+      } else if (document.documentElement.webkitRequestFullscreen) {
+        document.documentElement.webkitRequestFullscreen(); // Chrome, Safari
+      } else if (document.documentElement.msRequestFullscreen) {
+        document.documentElement.msRequestFullscreen(); // IE/Edge
+      }
     }
 
     // Reset to initial state
     function resetToInitial() {
-      isExamRunning = false; // Stop the timer
       document.exitFullscreen();
       examContainer.classList.add('hidden');
       mainContainer.classList.remove('hidden');
       examFrame.src = '';
       examLinkInput.value = '';
       startExamBtn.disabled = true;
+      clearInterval(timerInterval);
       timerDisplay.textContent = '00:00:00';
       removeSecurityListeners();
+      // Attempt to close tab
       window.close();
     }
 
     // Start timer with requestAnimationFrame for mobile compatibility
     function startTimer() {
-      isExamRunning = true;
+      clearInterval(timerInterval);
       let seconds = 0;
       let lastTime = performance.now();
       
       function updateTimer(currentTime) {
-        if (!isExamRunning) return; // Stop if exam is not running
-        if (document.hidden) {
-          lastTime = currentTime;
-          requestAnimationFrame(updateTimer);
-          return;
-        }
+        if (document.hidden) return; // Skip update if tab is not active
         const delta = (currentTime - lastTime) / 1000;
         if (delta >= 1) {
           seconds += Math.floor(delta);
@@ -155,10 +162,10 @@
           const secs = seconds % 60;
           timerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
-        requestAnimationFrame(updateTimer);
+        timerInterval = requestAnimationFrame(updateTimer);
       }
       
-      requestAnimationFrame(updateTimer);
+      timerInterval = requestAnimationFrame(updateTimer);
     }
 
     // Enable start exam button if link is provided
@@ -231,7 +238,6 @@
       document.addEventListener('visibilitychange', handleSecurityBreach);
       window.addEventListener('blur', handleSecurityBreach);
       window.addEventListener('pagehide', handleSecurityBreach);
-      document.addEventListener('fullscreenchange', handleFullscreenChange);
       document.addEventListener('keydown', preventShortcuts);
       document.addEventListener('contextmenu', preventContextMenu);
       document.addEventListener('copy', preventCopy);
@@ -241,7 +247,6 @@
       document.removeEventListener('visibilitychange', handleSecurityBreach);
       window.removeEventListener('blur', handleSecurityBreach);
       window.removeEventListener('pagehide', handleSecurityBreach);
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('keydown', preventShortcuts);
       document.removeEventListener('contextmenu', preventContextMenu);
       document.removeEventListener('copy', preventCopy);
@@ -252,13 +257,6 @@
       resetToInitial();
       errorMessage.textContent = 'Ujian dihentikan karena aktivitas mencurigakan.';
       errorMessage.classList.remove('hidden');
-    }
-
-    // Handle fullscreen change
-    function handleFullscreenChange() {
-      if (!document.fullscreenElement) {
-        handleSecurityBreach();
-      }
     }
 
     // Prevent shortcuts
@@ -290,5 +288,6 @@
       }
     });
   </script>
+
 </body>
 </html>
