@@ -60,36 +60,40 @@
 <body class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-pink-100 to-cream-100">
   <div id="main-container" class="w-full max-w-md p-6 bg-white rounded-lg shadow-lg transition-all duration-300">
     <h1 class="text-2xl font-bold text-center text-gray-800 mb-4">Masfy Exam Bro</h1>
-    
+
     <!-- Input Link -->
     <div class="mb-4">
       <label for="exam-link" class="block text-sm font-medium text-gray-700">Masukkan Tautan Ujian</label>
       <input type="url" id="exam-link" placeholder="https://example.com" class="mt-1 w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300" aria-label="Tautan ujian">
     </div>
-    
+
     <!-- QR Code Scanner -->
     <div class="mb-4">
       <button id="start-qr-scan" class="w-full py-2 bg-blue-300 text-white rounded-md hover:bg-blue-400 transition" aria-label="Mulai scan QR code">Scan QR Code</button>
       <div id="qr-reader" class="hidden mt-2"></div>
     </div>
-    
+
     <!-- Start Exam Button -->
-    <button id="start-exam" class="w-full py-2 bg-green-300 text-white rounded-md hover:bg-green-400 transition disabled:opacity-50" disabled aria-label="Mulai ujian">Mulai Ujian</button>
-    
+    <div class="mt-4">
+      <button id="start-exam" class="w-full py-2 bg-green-300 text-white rounded-md hover:bg-green-400 transition disabled:opacity-50" disabled aria-label="Mulai ujian">Mulai Ujian</button>
+    </div>
+
     <!-- Error Message -->
     <p id="error-message" class="text-red-500 text-sm mt-2 hidden" aria-live="assertive"></p>
-    
+
     <!-- Motivational Message -->
     <p class="text-center text-gray-600 text-sm mt-4">Selalu berdoa sebelum mengerjakan, semoga mendapatkan nilai terbaik.</p>
-<br><p>©2025 | Created by Mas Al </p>
+
+    <br><p class="text-center text-gray-600 text-sm mt-4">©2025 | Created by <a href="https://www.instagram.com/masalfy" target="_blank" class="text-blue-500">Mas Al</a></p>
+
   </div>
-  
+
   <!-- Exam Frame -->
   <div id="exam-container" class="hidden flex flex-col">
     <div class="header no-select">
       <h2 class="text-lg font-semibold text-gray-800">Ujian Berlangsung</h2>
       <div id="timer" class="text-md font-medium text-gray-800">00:00:00</div>
-      <button id="exit-exam" class="py-1 px-3 bg-red-300  text-white rounded-md hover:bg-red-400 transition" aria-label="Keluar dari ujian">Keluar</button>
+      <button id="exit-exam" class="py-1 px-3 bg-red-300 text-white rounded-md hover:bg-red-400 transition" aria-label="Keluar dari ujian">Keluar</button>
     </div>
     <iframe id="exam-frame" allow="forms"></iframe>
   </div>
@@ -278,5 +282,6 @@
       }
     });
   </script>
+
 </body>
 </html>
